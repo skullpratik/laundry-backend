@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const Review = require('../models/Review');
 
 // Register
 router.post('/register', async (req, res) => {
@@ -54,6 +55,31 @@ router.post('/admin-login', async (req, res) => {
     if (!isMatch) return res.status(401).json({ error: 'Invalid admin credentials' });
     const token = jwt.sign({ userId: admin._id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, admin: { name: admin.name, email: admin.email, role: admin.role } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Submit a review
+router.post('/review', async (req, res) => {
+  try {
+    const { name, email, text } = req.body;
+    if (!name || !email || !text) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    const review = new Review({ name, email, text });
+    await review.save();
+    res.status(201).json({ message: 'Review submitted' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Get all reviews
+router.get('/reviews', async (req, res) => {
+  try {
+    const reviews = await Review.find().sort({ createdAt: -1 }).limit(20);
+    res.json(reviews);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
