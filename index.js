@@ -7,8 +7,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173', // local dev
+  'https://online-laundry-service.vercel.app', // production Vercel URL (replace with your actual Vercel URL if different)
+];
+
 app.use(cors({
-  origin: 'https://online-laundry-service.vercel.app',
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
