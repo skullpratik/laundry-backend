@@ -8,15 +8,18 @@ const Review = require('../models/Review');
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
+    const { name, email, password, phone } = req.body;
+    if (!name || !phone || !password) {
+      return res.status(400).json({ error: 'Name, phone, and password are required' });
     }
-    const existingUser = await User.findOne({ email });
+    if (!/^\d{10}$/.test(phone)) {
+      return res.status(400).json({ error: 'Phone number must be exactly 10 digits' });
+    }
+    const existingUser = await User.findOne({ phone });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
+      return res.status(400).json({ error: 'Phone already registered' });
     }
-    const user = new User({ name, email, password });
+    const user = new User({ name, email, password, phone });
     await user.save();
     res.status(201).json({ message: 'User registered' });
   } catch (err) {
@@ -27,16 +30,19 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    const { phone, password } = req.body;
+    if (!phone || !password) {
+      return res.status(400).json({ error: 'Phone and password are required' });
     }
-    const user = await User.findOne({ email });
+    if (!/^\d{10}$/.test(phone)) {
+      return res.status(400).json({ error: 'Phone number must be exactly 10 digits' });
+    }
+    const user = await User.findOne({ phone });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
+    res.json({ token, user: { name: user.name, email: user.email, phone: user.phone, role: user.role } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
