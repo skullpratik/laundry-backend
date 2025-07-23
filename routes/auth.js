@@ -15,6 +15,9 @@ router.post('/register', async (req, res) => {
     if (!/^\d{10}$/.test(phone)) {
       return res.status(400).json({ error: 'Phone number must be exactly 10 digits' });
     }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
       return res.status(400).json({ error: 'Phone already registered' });
@@ -30,15 +33,19 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { phone, password } = req.body;
-    if (!phone || !password) {
-      return res.status(400).json({ error: 'Phone and password are required' });
+    const { phone, name, password } = req.body;
+    if (!phone || !name || !password) {
+      return res.status(400).json({ error: 'Phone, name, and password are required' });
     }
     if (!/^\d{10}$/.test(phone)) {
       return res.status(400).json({ error: 'Phone number must be exactly 10 digits' });
     }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
     const user = await User.findOne({ phone });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (user.name !== name) return res.status(401).json({ error: 'Invalid credentials' });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
