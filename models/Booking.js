@@ -7,7 +7,8 @@ const bookingSchema = new mongoose.Schema({
   clothCount: { type: Number, required: true },
   serviceType: { type: String, required: true },
   notes: { type: String },
-  status: { type: String, enum: ['pending', 'accepted', 'processed', 'on the way', 'delivered'], default: 'pending' },
+  status: { type: String, enum: ['pending', 'accepted', 'processed', 'on the way', 'delivered', 'cancelled'], default: 'pending' },
+  cancelReason: { type: String },
   date: { type: Date, default: Date.now },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });

@@ -78,9 +78,15 @@ router.delete('/:id', auth, async (req, res) => {
 // Admin: update status
 router.patch('/status/:id', async (req, res) => {
   try {
+    const update = { status: req.body.status };
+    if (req.body.status === 'cancelled' && req.body.cancelReason) {
+      update.cancelReason = req.body.cancelReason;
+    } else if (req.body.status !== 'cancelled') {
+      update.cancelReason = undefined;
+    }
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
-      { status: req.body.status },
+      update,
       { new: true }
     );
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
