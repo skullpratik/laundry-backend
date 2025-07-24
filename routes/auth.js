@@ -1,3 +1,8 @@
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+
 // Admin login route
 router.post('/admin-login', async (req, res) => {
   try {
@@ -20,10 +25,7 @@ router.post('/admin-login', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+
 
 // Register route
 router.post('/register', async (req, res) => {
