@@ -1,3 +1,25 @@
+// Admin login route
+router.post('/admin-login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' });
+    }
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Admin user does not exist.' });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+    // Optionally, check for admin role here if you add roles later
+    res.status(200).json({ message: 'Admin login successful.', user: { email: user.email, name: user.name } });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
