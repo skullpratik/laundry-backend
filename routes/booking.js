@@ -84,6 +84,10 @@ router.patch('/status/:id', async (req, res) => {
     } else if (req.body.status !== 'cancelled') {
       update.cancelReason = undefined;
     }
+    // Allow admin to set amount
+    if (typeof req.body.amount === 'number') {
+      update.amount = req.body.amount;
+    }
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       update,
