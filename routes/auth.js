@@ -36,13 +36,21 @@ router.post('/register', async (req, res) => {
     }
     const existingUser = await User.findOne({ phone });
     if (existingUser) {
-      return res.status(409).json({ message: 'User already exists with this phone number.' });
+      return res.status(409).json({ message: 'User already exists.' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ phone, password: hashedPassword, name, email });
     await user.save();
     res.status(201).json({ message: 'Registration successful.' });
   } catch (err) {
+    // Duplicate key error (phone already exists)
+    if (err.code === 11000 && err.keyPattern && err.keyPattern.phone) {
+      return res.status(409).json({ message: 'User already exists.' });
+    }
+    // Validation error
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ message: err.message });
+    }
     res.status(500).json({ message: 'Server error.' });
   }
 });
@@ -60,7 +68,7 @@ router.post('/login', async (req, res) => {
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      return res.status(401).json({ message: 'Incorrect password.' });
     }
     res.status(200).json({ message: 'Login successful.', user: { phone: user.phone, name: user.name, email: user.email } });
   } catch (err) {
