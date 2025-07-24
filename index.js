@@ -27,6 +27,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 app.use('/api/bookings', require('./routes/booking'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/reviews', require('./routes/review'));
 
 // Test route
 app.get('/api/test', (req, res) => {
