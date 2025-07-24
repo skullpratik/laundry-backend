@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 // Register route
 router.post('/register', async (req, res) => {
   try {
-    const { phone, name, password } = req.body;
+    const { phone, password, name, email } = req.body;
     if (!phone || !password) {
       return res.status(400).json({ message: 'Phone and password are required.' });
     }
@@ -15,7 +15,7 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ message: 'User already exists with this phone number.' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ phone, name, password: hashedPassword });
+    const user = new User({ phone, password: hashedPassword, name, email });
     await user.save();
     res.status(201).json({ message: 'Registration successful.' });
   } catch (err) {
@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
-    res.status(200).json({ message: 'Login successful.', user: { phone: user.phone, name: user.name } });
+    res.status(200).json({ message: 'Login successful.', user: { phone: user.phone, name: user.name, email: user.email } });
   } catch (err) {
     res.status(500).json({ message: 'Server error.' });
   }
